@@ -1,6 +1,6 @@
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect, useCallback } from "react";
 import axiosInstance from "../utils/axiosInstance";
-// import { API_PATHS } from "../utils/apiPaths";
+import { API_PATHS } from "../utils/apiPaths";
 
 export const UserContext = createContext();
 
@@ -8,9 +8,13 @@ const UserProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    // ADDED: useCallback to memoize clearUser
+    const clearUser = useCallback(() => {
+        setUser(null);
+        localStorage.removeItem("token");
+    }, []);
+
     useEffect(() => {
-        if (user) return;
-        
         const accessToken = localStorage.getItem("token");
         if (!accessToken) {
             setLoading(false);
@@ -19,7 +23,7 @@ const UserProvider = ({ children }) => {
 
         const fetchUser = async () => {
             try {
-                // const response = await axiosInstance.get(API_PATHS.AUTH.GET_PROFILE);
+                const response = await axiosInstance.get(API_PATHS.AUTH.GET_PROFILE);
                 setUser(response.data);
             } catch (error) {
                 console.error("User not authenticated", error);
@@ -30,17 +34,12 @@ const UserProvider = ({ children }) => {
         };
         
         fetchUser();
-    }, []);
+    }, [clearUser]); // FIXED: Removed 'user' from dependencies
 
     const updateUser = (userData) => {
         setUser(userData);
         localStorage.setItem("token", userData.token);
         setLoading(false);
-    };
-
-    const clearUser = () => {
-        setUser(null);
-        localStorage.removeItem("token");
     };
 
     return (

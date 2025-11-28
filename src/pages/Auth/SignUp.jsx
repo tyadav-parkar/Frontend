@@ -1,35 +1,41 @@
-import React, { useState,useContext } from 'react'
-import { Link, Navigate ,useNavigate} from 'react-router-dom'
-import AuthLayout from '../../components/layouts/AuthLayout'
+import React, { useState, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import AuthLayout from '../../components/layouts/AuthLayout';
 import ProfilePhotoSelector from '../../components/Inputs/ProfilePhotoSelector';
 import Input from '../../components/Inputs/Input';
 import axiosInstance from '../../utils/axiosInstance';
-// import  Import it from api path url from utils/apipath/
+import { API_PATHS } from '../../utils/apiPaths';
 import { UserContext } from '../../context/userContext';
 import uploadImage from '../../utils/uploadImage';
 
 const Signup = () => {
-  const [profilePic, setProfilePic]=useState(null);
-  const [fullName, setFullName]=useState("");
-  const [email, setEmail]=useState("");
-  const [password, setPassword]=useState("");
-  const [adminInviteToken, setAdminInviteToken]=useState('');
-  const [error, setError]=useState(null);
+  const [profilePic, setProfilePic] = useState(null);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [adminInviteToken, setAdminInviteToken] = useState('');
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const {updateUser}=useContext(UserContext);
+  const { updateUser } = useContext(UserContext);
+
   // Email validation function
   const validateEmail = (email) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
   };
 
-  // Handle Login Form Submit
+  // Handle SignUp Form Submit
   const handleSignUp = async (e) => {
     e.preventDefault();
-    if(profilePic){
-      const imgUploadRes=await uploadImage(profilePic);
-       profileImageUrl=imgUploadRes.imageUrl || "";
+
+    // MOVED: profileImageUrl declaration inside function
+    let profileImageUrl = "";
+
+    if (profilePic) {
+      const imgUploadRes = await uploadImage(profilePic);
+      profileImageUrl = imgUploadRes.imageUrl || "";
     }
+
     if (!fullName) {
       setError("Please enter full Name");
       return;
@@ -42,35 +48,40 @@ const Signup = () => {
       setError("Please enter the password");
       return;
     }
-    
+
     setError("");
-    //Sign Up API Call
-     try{
-        const response=await axiosInstance.post(API_PATHS.AUTH.REGISTER,{
-          name:fullName,
-          email,
-          password,
-          profileImageUrl,
-          adminInviteToken
-        })
-        const {token, role} =response.data;
-        if(token){
-          localStorage.setItem("token",token);
-          updateUser(response.data);
-        }
-        if(role==="admin"){
-          navigate("/admin/dashboard")
-        }else{
-          navigate("user/dashboard")
-        }
+
+    // Sign Up API Call
+    try {
+      const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, {
+        name: fullName,
+        email,
+        password,
+        profileImageUrl,
+        adminInviteToken
+      });
+
+      const { token, role } = response.data;
+
+      if (token) {
+        localStorage.setItem("token", token);
+        updateUser(response.data);
       }
-      catch(error){
-          if(error.response && error.response.data.message){
-            setError(error.response.data.message);
-          }else{
-            setError("Something went wrong")
-          }
+
+      // FIXED: Added "/" before user/dashboard
+      if (role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/user/dashboard");
       }
+    } catch (error) {
+      console.error("Signup error:", error);
+      if (error.response && error.response.data.message) {
+        setError(error.response.data.message);
+      } else {
+        setError("Something went wrong");
+      }
+    }
   };
 
   return (
@@ -81,11 +92,11 @@ const Signup = () => {
           Join us today by entering your details below.
         </p>
         <form onSubmit={handleSignUp}>
-          <ProfilePhotoSelector image={profilePic} setImage={setProfilePic}/>
+          <ProfilePhotoSelector image={profilePic} setImage={setProfilePic} />
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             <Input
               value={fullName}
-              onChange={({target})=> setFullName(target.value)}
+              onChange={({ target }) => setFullName(target.value)}
               label="Full Name"
               placeholder="John"
               type="text"
@@ -125,7 +136,7 @@ const Signup = () => {
         </form>
       </div>
     </AuthLayout>
-  )
-}
+  );
+};
 
-export default Signup
+export default Signup;

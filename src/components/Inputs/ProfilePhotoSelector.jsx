@@ -21,8 +21,8 @@ const ProfilePhotoSelector = ({image,setImage}) => {
     }
   return (
     <div className='flex justify-center mb-6'>
-        <input 
-        type="file" 
+        <input
+        type="file"
         accept="image/*"
         ref={inputRef}
         onChange={handleImageChange}
@@ -40,13 +40,13 @@ const ProfilePhotoSelector = ({image,setImage}) => {
                 </button>
             </div>
         ) : (
-            <div className="relative"> 
-                <img 
+            <div className="relative">
+                <img
                     src={previewUrl}
                     alt="profile photo"
                     className='w-20 h-20 rounded-full object-cover'
                 />
-                <button 
+                <button
                     type="button"
                     className='w-8 h-8 flex  items-center justify-center  bg-red-500 text-white  rounded-full absolute -bottom-1 -right-1 '
                     onClick={handleRemoveImage}
@@ -58,5 +58,6 @@ const ProfilePhotoSelector = ({image,setImage}) => {
     </div>
   )
 }
-
+ 
 export default ProfilePhotoSelector
+ 

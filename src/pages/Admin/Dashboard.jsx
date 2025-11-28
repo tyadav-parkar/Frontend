@@ -1,13 +1,178 @@
-import React from 'react'
-import { useUserAuth } from '../../hooks/useUserAuth'
-import { UserContext } from '../../context/userContext';
-import { useContext } from 'react';
-import DashboardLayout from '../../components/layouts/DashboardLayout';
-
+import React from "react";
+import { useUserAuth } from "../../hooks/useUserAuth";
+import { UserContext } from "../../context/userContext";
+import { useContext, useState, useEffect } from "react";
+import DashboardLayout from "../../components/layouts/DashboardLayout";
+import { useNavigate } from "react-router-dom";
+import axiosInstance from "../../utils/axiosInstance";
+import { API_PATHS } from "../../utils/apiPaths";
+import moment from "moment";
+import InfoCard from "../../components/Cards/InfoCard";
+import TaskListTable from "../../components/layouts/TaskListTable";
+import { LuArrowRight } from "react-icons/lu";
+import {
+  IoMdCard,
+  IoMdTime,
+  IoMdCheckmarkCircle,
+  IoMdAlert,
+} from "react-icons/io";
+import { addThousandsSeparator } from "../../utils/helper";
+import CustomPieChart from "../../components/Charts/CustomPieChart";
+import CustomBarChart from "../../components/Charts/CustomBarChart";
+const COLORS = ["#8D52FF", "#00B8D8", "#7BCE00"];
 const Dashboard = () => {
-  // useUserAuth();
-  // const {user}=useContext(UserContext);
-  return <DashboardLayout>Dashboard</DashboardLayout>
-}
+  useUserAuth();
+  const { user } = useContext(UserContext);
+  const navigate = useNavigate();
+  const [dashboardData, setDashboardData] = useState(null);
+  const [pieChartData, setPieChartData] = useState([]);
+  const [barChartData, setBarChartData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-export default Dashboard
+  const prepareChartData = (data) => {
+    const taskDistribution = data?.taskDistribution || null;
+    const taskPriorityLevels = data?.taskPriorityLevels || null;
+
+    const taskDistributionData = [
+      { status: "Pending", count: taskDistribution?.Pending || 0 },
+      { status: "In Progress", count: taskDistribution?.InProgress || 0 },
+      { status: "Completed", count: taskDistribution?.Completed || 0 },
+    ];
+    setPieChartData(taskDistributionData);
+
+    const PriorityLevelData = [
+      { status: "Low", count: taskPriorityLevels?.Low || 0 }, // ✅
+      { status: "Medium", count: taskPriorityLevels?.Medium || 0 },
+      { status: "High", count: taskPriorityLevels?.High || 0 },
+    ];
+ 
+    setBarChartData(PriorityLevelData);
+  };
+
+  const getDashboardData = async () => {
+    try {
+      setLoading(true);
+      setErrorMsg("");
+
+      const response = await axiosInstance.get(
+        API_PATHS.TASKS.GET_DASHBOARD_DATA
+      );
+      console.log(response.data);
+      if (response?.data) {
+        const data = response.data;
+        setDashboardData(data);
+        prepareChartData(response.data?.charts || null);
+      } else {
+        setErrorMsg("No dashboard data available.");
+      }
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+      setErrorMsg(
+        error?.response?.data?.message ||
+          "Error fetching dashboard data. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+  const onSeeMore = () => {
+    navigate("/admin/tasks");
+  };
+  useEffect(() => {
+    getDashboardData();
+    return () => {};
+  }, []);
+  return (
+    <DashboardLayout activeMenu="Dashboard">
+      <div className="card my-5 p-4 bg-white rounded shadow">
+        <div className="grid grid-cols-3 gap-4">
+          <div className="col-span-3">
+            <h2 className="text-xl md:text-2xl font-semibold text-gray-800">
+              Good Morning, {user?.name}
+            </h2>
+            <p className="text-xs md:text-sm text-gray-500 mt-1.5">
+              {moment().format("dddd, Do MMM YYYY")}
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mt-6">
+          <InfoCard
+            icon={<IoMdCard className="text-primary text-3xl" />}
+            label="Total Tasks"
+            value={addThousandsSeparator(
+              dashboardData?.charts?.taskDistribution?.All || 0
+            )}
+            color="bg-primary"
+          />
+          <InfoCard
+            icon={<IoMdTime className="text-yellow-500 text-3xl" />}
+            label="Pending Tasks"
+            value={addThousandsSeparator(
+              dashboardData?.charts?.taskDistribution?.pending || 0
+            )}
+            color="bg-yellow-500"
+          />
+          <InfoCard
+            icon={<IoMdCheckmarkCircle className="text-green-500 text-3xl" />}
+            label="Completed Tasks"
+            value={addThousandsSeparator(
+              dashboardData?.charts?.taskDistribution?.completed || 0
+            )}
+            color="bg-green-500"
+          />
+          <InfoCard
+            icon={<IoMdAlert className="text-red-500 text-3xl" />}
+            label="Overdue Tasks"
+            value={addThousandsSeparator(
+              dashboardData?.statistics?.overdueTasks || 0
+            )}
+            color="bg-red-500"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-4 md:my-6">
+
+        <div>
+          <div className="card p-4 bg-white rounded-lg shadow">
+            <div className="flex items-center justify-between mb-4">
+              <h5 className="font-medium">Task Distribution</h5>
+            </div>
+            <CustomPieChart data={pieChartData} colors={COLORS} />
+          </div>
+        </div>
+
+        <div>
+          <div className="card p-4 bg-white rounded-lg shadow">
+            <div className="flex items-center justify-between mb-4">
+              <h5 className="font-medium">Task Priority Levels</h5>
+            </div>
+            <CustomBarChart data={barChartData}  />
+          </div>
+        </div>
+
+
+        <div className="md:col-span-2">
+          <div className="card p-4 bg-white rounded-lg shadow">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <h5 className="text-lg font-semibold text-gray-800">
+                Recent Tasks
+              </h5>
+              <button className="card-btn" onClick={onSeeMore}>
+                See All <LuArrowRight className="text-base" />
+              </button>
+            </div>
+
+            {/* Task Table */}
+            <TaskListTable tableData={dashboardData?.recentTasks || []} />
+          </div>
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default Dashboard;
