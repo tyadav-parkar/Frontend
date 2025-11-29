@@ -19,7 +19,7 @@ const AddAttachmentsInput = ({ attachments, setAttachments }) => {
  
     return (
         <div className="">
-            <div className="">
+            <div className="flex justify-between bg-gray-50 border-gary-100 px-3 py-2 rounded-md mb-3 mt-2">
                 {attachments.map((item, index) => (
                     <div
                         key={item}

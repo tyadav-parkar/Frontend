@@ -107,19 +107,19 @@ const TaskListTable = ({ tableData = [] }) => {
 };
 
 /* ---------- Helpers ---------- */
-// const normalizeStatusLabel = (status) => {
-//   if (!status) return "-";
-//   const s = status.toLowerCase().replace(/\s+/g, "");
-//   if (s === "inprogress") return "In Progress";
-//   if (s === "pending") return "Pending";
-//   if (s === "completed") return "Completed";
-//   return capitalize(status);
-// };
+const normalizeStatusLabel = (status) => {
+  if (!status) return "-";
+  const s = status.toLowerCase().replace(/\s+/g, "");
+  if (s === "inprogress") return "In Progress";
+  if (s === "pending") return "Pending";
+  if (s === "completed") return "Completed";
+  return capitalize(status);
+};
 
-// const capitalize = (str) => {
-//   if (!str) return "-";
-//   const s = String(str);
-//   return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
-// };
+const capitalize = (str) => {
+  if (!str) return "-";
+  const s = String(str);
+  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+};
 
 export default TaskListTable;
