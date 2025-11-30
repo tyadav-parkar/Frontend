@@ -8,8 +8,8 @@ const UserProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // ADDED: useCallback to memoize clearUser
     const clearUser = useCallback(() => {
+        console.log("Clearing user..."); // DEBUG
         setUser(null);
         localStorage.removeItem("token");
     }, []);
@@ -34,7 +34,7 @@ const UserProvider = ({ children }) => {
         };
         
         fetchUser();
-    }, [clearUser]); // FIXED: Removed 'user' from dependencies
+    }, [clearUser]);
 
     const updateUser = (userData) => {
         setUser(userData);

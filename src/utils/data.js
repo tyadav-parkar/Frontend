@@ -34,7 +34,7 @@ export const SIDE_MENU_DATA = [
     id: "05",
     label: "Logout",
     icon: LuLogOut,
-    path: "/admin/users",
+    path: "logout",
   },
 ];
 export const SIDE_MENU_USER_DATA = [
@@ -60,6 +60,6 @@ export const PRIORITY_DATA = [
 
 export const STATUS_DATA = [
   { label: "Pending", value: "pending" },
-  { label: "In Progress", value: "in Progress" },
+  { label: "In Progress", value: "in progress" },
   { label: "Completed", value: "completed" },
 ];

@@ -51,7 +51,6 @@ const App = () => {
             <Route path="/admin/users" element={<ManageUsers />} />
           </Route>
           
-          {/* User Routes - FIXED: Changed "user" to "member" */}
           <Route element={<PrivateRoute allowedRoles={["member"]} />}>
             <Route path="/user/dashboard" element={<DashboardUser />} />
             <Route path="/user/tasks" element={<MyTasks />} />
