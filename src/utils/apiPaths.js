@@ -12,6 +12,8 @@ export const API_PATHS = {
     CREATE_USER: "/api/users",
     UPDATE_USER: (userId) => `/api/users/${userId}`,
     DELETE_USER: (userId) => `/api/users/${userId}`,
+    // *** ADD THIS NEW PATH ***
+    UPDATE_USER_ROLE: (userId) => `/api/users/update-role/${userId}`,
   },
   TASKS: {
     GET_DASHBOARD_DATA: "/api/tasks/dashboard-data",
@@ -29,6 +31,6 @@ export const API_PATHS = {
     EXPORT_USERS: "/api/reports/export/users",
   },
   IMAGE: {
-    UPLOAD_IMAGE: "/api/auth/upload-image", // leading slash ✅
+    UPLOAD_IMAGE: "/api/auth/upload-image",
   },
 };

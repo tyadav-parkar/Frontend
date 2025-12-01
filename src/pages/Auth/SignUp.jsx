@@ -13,74 +13,43 @@ const Signup = () => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [adminInviteToken, setAdminInviteToken] = useState('');
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const { updateUser } = useContext(UserContext);
 
-  // Email validation function
   const validateEmail = (email) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
   };
 
-  // Handle SignUp Form Submit
   const handleSignUp = async (e) => {
     e.preventDefault();
-
-    // MOVED: profileImageUrl declaration inside function
     let profileImageUrl = "";
 
     if (profilePic) {
       const imgUploadRes = await uploadImage(profilePic);
       profileImageUrl = imgUploadRes.imageUrl || "";
     }
-
-    if (!fullName) {
-      setError("Please enter full Name");
-      return;
-    }
-    if (!validateEmail(email)) {
-      setError("Please enter a valid email address.");
-      return;
-    }
-    if (!password) {
-      setError("Please enter the password");
-      return;
-    }
-
+    // ... validation logic remains the same ...
+    if (!fullName) { setError("Please enter full Name"); return; }
+    if (!validateEmail(email)) { setError("Please enter a valid email address."); return; }
+    if (!password) { setError("Please enter the password"); return; }
     setError("");
 
-    // Sign Up API Call
     try {
       const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, {
-        name: fullName,
-        email,
-        password,
-        profileImageUrl,
-        adminInviteToken
+        name: fullName, email, password, profileImageUrl,
       });
 
       const { token, role } = response.data;
+      if (token) { localStorage.setItem("token", token); updateUser(response.data); }
 
-      if (token) {
-        localStorage.setItem("token", token);
-        updateUser(response.data);
-      }
+      if (role === "admin") navigate("/admin/dashboard");
+      else navigate("/user/dashboard");
 
-      // FIXED: Added "/" before user/dashboard
-      if (role === "admin") {
-        navigate("/admin/dashboard");
-      } else {
-        navigate("/user/dashboard");
-      }
     } catch (error) {
       console.error("Signup error:", error);
-      if (error.response && error.response.data.message) {
-        setError(error.response.data.message);
-      } else {
-        setError("Something went wrong");
-      }
+      setError(error.response?.data?.message || "Something went wrong");
     }
   };
 
@@ -93,6 +62,7 @@ const Signup = () => {
         </p>
         <form onSubmit={handleSignUp}>
           <ProfilePhotoSelector image={profilePic} setImage={setProfilePic} />
+          
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             <Input
               value={fullName}
@@ -115,18 +85,17 @@ const Signup = () => {
               placeholder="Min 8 Characters "
               type="password"
             />
-            <Input
-              value={adminInviteToken}
-              onChange={({ target }) => setAdminInviteToken(target.value)}
-              label="Admin Invite Token"
-              placeholder="6 Digit Code "
-              type="text"
-            />
-            {error && <p className='text-red-500 text-xs pb-2.5'>{error}</p>}
-            <button type="submit" className="btn-primary">
+          </div>
+
+          <div className='mt-6'> 
+            {error && <p className='text-red-500 text-xs pb-4'>{error}</p>}
+            
+            {/* The class controlling size remains 'btn-primary' */}
+            <button type="submit" className="btn-primary w-full">
               SignUp
             </button>
-            <p className="text-[13px] text-slate-800 mt-3">
+
+            <p className="text-[13px] text-slate-800 mt-3 text-center">
               Already have an account?{" "}
               <Link className="font-medium text-primary underline" to="/login">
                 Login

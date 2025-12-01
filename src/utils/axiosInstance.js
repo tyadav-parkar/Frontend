@@ -17,8 +17,8 @@ axiosInstance.interceptors.request.use(
     if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
       const accessToken = localStorage.getItem("token");
       if (accessToken) {
-        // CRITICAL FIX: Use backticks `` not single quotes ''
-        config.headers.Authorization = `Bearer ${accessToken}`;
+        // FIXED: Use backticks `` not single quotes '' for template literals
+        config.headers.Authorization = `Bearer ${accessToken}`; 
       }
     }
     return config;
@@ -30,7 +30,7 @@ axiosInstance.interceptors.request.use(
 
 // Response Interceptors
 axiosInstance.interceptors.response.use(
-  (response) => response, // FIXED: Typo "resposne"
+  (response) => response, 
   (error) => {
     if (error.response) {
       const { status } = error.response;
@@ -43,7 +43,7 @@ axiosInstance.interceptors.response.use(
       } else if (status === 500) {
         console.error("Server error. Please try again later.");
       }
-    } else if (error.code === "ECONNABORTED") { // FIXED: Typo "ECONNARORTED"
+    } else if (error.code === "ECONNABORTED") { // FIXED: Typo here
       console.warn("Request timeout. Please try again later.");
     } else {
       console.error("An unexpected error occurred:", error.message || error);
